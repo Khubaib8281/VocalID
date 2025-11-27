@@ -1,4 +1,4 @@
-from voice_verifier.verifier import VoiceVerifier
+from vocalid.verifier import VoiceVerifier
 
 verifier = VoiceVerifier("my_model.pkl")
 
