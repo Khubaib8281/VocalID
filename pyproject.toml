@@ -30,7 +30,7 @@ test = [
 [tool.pytest.ini_options]
 python_files = "test_*.py"
 
-[python.scripts]
+[project.scripts]
 voice-verify = "vocalid.cli:app"
 
 keywords = ["voice-verification", "ecapa-tdnn", "ml", "speech"]
