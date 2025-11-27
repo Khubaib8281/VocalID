@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vocalid"
-version = "0.1.0"
+version = "0.1.1"
 description = "Personal voice verification toolkit using ECAPA-TDNN embeddings"
 authors = [{name="Muhammad Khubaib Ahmad", email="khubaib0.1ai@gmail.com"}]
 license = {text="MIT"}

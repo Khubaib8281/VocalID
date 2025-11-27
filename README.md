@@ -213,7 +213,7 @@ print("Report:\n", metrics["report"])
 
 ```
 
-### CLI Commands
+### CLI Commands   
 
 ``` python
     vocalid train --positive my_voice --negative others --output model.pkl
@@ -258,7 +258,7 @@ Tests can be run with:
 
 **Muhammad Khubaib Ahmad**\
 
-AI/ML Engineer and Voice Intelligence Researcher
+AI/ML Engineer, Data Scientist and Voice Intelligence Researcher
 
 ### Portfolio and Links
 

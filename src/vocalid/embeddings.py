@@ -4,10 +4,24 @@ from .audio_utils import load_audio
 
 class EmbeddingExtractor:
     def __init__(self, model_path="speechbrain/spkrec-ecapa-voxceleb"):
+        # Lazy import, avoid SpeechBrain crashing on torchaudio
+        try:
+            import torchaudio
+            # Patch missing API if needed
+            if not hasattr(torchaudio, "list_audio_backends"):
+                torchaudio.list_audio_backends = lambda: ["sox_io"]
+        except Exception:
+            pass
+
         try:
             from speechbrain.inference import EncoderClassifier
         except Exception as e:
-            raise ImportError(f"Failed to import SpeechBrain: {e}") from e
+            raise ImportError(
+                "SpeechBrain failed to import. "
+                "Your torchaudio version is incompatible.\n"
+                "Install newer torchaudio or use CPU-only fallback.\n"
+                f"Original error: {e}"
+            )
 
         self.model = EncoderClassifier.from_hparams(
             source=model_path,
