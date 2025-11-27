@@ -40,13 +40,6 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
-keywords = ["voice-verification", "ecapa-tdnn", "ml", "speech"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
-]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["vocalid*"]
