@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vocalid"
+version = "0.1.0"
+description = "Personal voice verification toolkit using ECAPA-TDNN embeddings"
+authors = [{name="Muhammad Khubaib Ahmad", email="khubaib0.1ai@gmail.com"}]
+license = {text="MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "torch",
+    "torchaudio",
+    "speechbrain",
+    "scikit-learn",
+    "joblib",
+    "sounddevice",
+    "numpy",
+    "fastapi",
+    "uvicorn"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+
+[python.scripts]
+voice-verify = "vocalid.cli:app"
+
+keywords = ["voice-verification", "ecapa-tdnn", "ml", "speech"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+keywords = ["voice-verification", "ecapa-tdnn", "ml", "speech"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["vocalid*"]
+exclude = ["tests*", "api*"]
