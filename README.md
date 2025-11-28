@@ -1,6 +1,8 @@
 # VocalID: A Lightweight Voice Authentication Toolkit
 
-VocalID is a practical and lightweight voice authentication library built around ECAPA-TDNN speaker embeddings and a simple classification layer. It lets you train your own voice model, evaluate its performance, and verify identities from recorded or live audio. The goal is to make voice verification simple to run, easy to extend, and stable across devices.
+[![PyPI Downloads](https://img.shields.io/pypi/dm/vocalid?label=PyPI%20Downloads)](https://pypi.org/project/vocalid/)
+
+VocalID is a practical and lightweight voice authentication library built around ECAPA-TDNN speaker embeddings and a simple classification layer. It lets you train your own voice model, evaluate its performance, and verify identities from recorded or live audio to use voice as a biometric to unlock apps, applications and for privacy. The goal is to make voice verification simple to run, easy to extend, and stable across devices.
 
 ---
 
@@ -14,6 +16,7 @@ VocalID is a practical and lightweight voice authentication library built around
 * Modular, readable codebase
 * Simple model storage using pickle
 * Test suite included
+* Simple FastAPI server for verification
 
 ---
 
@@ -63,6 +66,8 @@ VocalID/
 
 ## Installation
 
+> For **windows** users
+
 ```bash
 pip install vocalid
 ```
@@ -74,6 +79,16 @@ git clone https://github.com/Khubaib8281/VocalID.git
 cd VocalID
 pip install -e .
 ```
+
+> For **Linux** Users
+
+Also install;
+
+```ubuntu
+apt-get install -y libportaudio2
+```
+
+Since, `soundevice` relies on `libportaudio2`
 
 ---
 
@@ -141,8 +156,7 @@ print(ok, score)
 ### Verify live audio
 
 ```python
-audio_tensor = trainer.record_audio(seconds=4)
-ok, score = verifier.verify_array(audio_tensor)
+ok, score = verifier.verify_live(audio_tensor)
 print(ok, score)
 ```
 
@@ -180,7 +194,7 @@ vocalid live --model model.pkl --seconds 4
 
 ## Use Cases
 
-* Personal voice-unlock systems
+* Personal voice-unlock systems for apps, applications and systems
 * Lightweight speaker verification
 * Research in speaker embeddings
 * Prototyping identity checks
