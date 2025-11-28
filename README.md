@@ -1,275 +1,230 @@
 # VocalID: A Lightweight Voice Authentication Toolkit
 
-VocalID is a compact and practical voice authentication library that
-combines ECAPA-TDNN embeddings with a simple classifier to verify user
-identity from audio recordings. It supports file-based verification and
-real-time microphone input. The project is designed to be easy to train,
-deploy, and# VocalID: A Lightweight Voice Authentication Toolkit
+VocalID is a practical and lightweight voice authentication library built around ECAPA-TDNN speaker embeddings and a simple classification layer. It lets you train your own voice model, evaluate its performance, and verify identities from recorded or live audio. The goal is to make voice verification simple to run, easy to extend, and stable across devices.
 
-VocalID is a compact and practical voice authentication library that
-combines ECAPA-TDNN embeddings with a simple classifier to verify user
-identity from audio recordings. It supports file-based verification and
-real-time microphone input. The project is designed to be easy to train,
-deploy, and extend.
-
-------------------------------------------------------------------------
+---
 
 ## Features
 
-- **ECAPA-TDNN embeddings** using `speechbrain/spkrec-ecapa-voxceleb`
-- **Training** with positive (owner) and negative (impostor) audio
-    samples
-- **Evaluation** with accuracy and classification metrics
-- **Verification** from audio files or live microphone input
-- **CLI toolkit** for training, evaluating, and verifying
-- **Modular design** with trainer, verifier, embeddings, config, and
-    utilities
-- **Simple model storage** using pickle-based persistence
-- **Full test suite included**
+* ECAPA-TDNN speaker embeddings (`speechbrain/spkrec-ecapa-voxceleb`)
+* Easy training workflow for positive (owner) and negative samples
+* Evaluation with accuracy and a full classification report
+* File-based verification and optional live microphone verification
+* Clean CLI for training, testing and verification
+* Modular, readable codebase
+* Simple model storage using pickle
+* Test suite included
 
-------------------------------------------------------------------------
+---
 
 ## How It Works
 
-### 1. Audio Processing
+**1. Audio Processing**
+Audio is loaded or recorded, resampled to the target rate, converted to mono and padded to a minimum length.
 
-Audio is loaded or recorded, resampled, and normalized.
+**2. Embedding Extraction**
+We extract fixed-dimensional embeddings using ECAPA-TDNN. These embeddings capture speaker-specific characteristics.
 
-### 2. Embedding Extraction
+**3. Training**
+A logistic regression classifier is trained on positive and negative embeddings.
 
-ECAPA-TDNN generates fixed-dimensional speaker embeddings. These embeddings represent unique speaker characteristics.
+**4. Verification**
+When verifying a sample:
 
-### 3. Feature Preparation
+1. Extract the embedding
+2. Run it through the model
+3. Get a probability score
+4. Compare with the threshold from `config.py`
 
-Positive and negative embeddings are labeled and fed into the trainer.
-
-### 4. Classification Model
-
-A simple Logistic Regression model is trained on the embeddings.
-
-### 5. Verification
-
-During verification:
-
-1. Extract embeddings for the new audio.
-2. Predict with trained classifier.
-3. Return a confidence score.
-4. Compare score with threshold from `config.py`.
-
-------------------------------------------------------------------------
+---
 
 ## Package Structure
 
-    VocalID
-        └── voice_verifier/
-            │
-            ├── trainer.py         # Training logic, evaluation, model save/load
-            ├── verifier.py        # File and waveform verification
-            ├── embeddings.py      # ECAPA-TDNN embedding extraction
-            ├── audio_utils.py     # Audio loading and microphone recording
-            ├── config.py          # Threshold + ECAPA model configuration
-            ├── model_store.py     # Model checkpoint loader
-            ├── cli.py             # Command-line interface
-        └── tests/                 # Full pytest suite
-        └── examples/
-        └── requirements.txt
-        └── api/
-            ├── app.py
-        └── README.md
+```
+VocalID/
+│
+├── voice_verifier/
+│   ├── trainer.py        # Training, evaluation, saving, loading
+│   ├── verifier.py       # Verification from file or tensor
+│   ├── embeddings.py     # ECAPA-TDNN embedding extractor
+│   ├── audio_utils.py    # Audio loading / microphone recording
+│   ├── config.py         # Threshold, sample rate, model config
+│   ├── model_store.py    # Pickle storage helpers
+│   ├── cli.py            # CLI interface
+│
+├── tests/                # Pytest suite
+├── examples/             # Example scripts
+├── requirements.txt
+├── api/app.py            # Optional API server example
+└── README.md
+```
 
-------------------------------------------------------------------------
-
-## Components
-
-### VoiceTrainer
-
-Functions: - `train()` - `evaluate()` - `prepare_features()` -
-`save()` - `load()`
-
-### VoiceVerifier
-
-Methods: - `verify_file(path)` - `verify_array(audio_tensor)`
-
-### EmbeddingExtractor
-
-- `embed_file(path)`
-- `embed_waveform(waveform, sr)`
-
-### Audio Utilities
-
-- `load_audio(path)`
-- `record_audio(seconds)`
-
-------------------------------------------------------------------------
+---
 
 ## Installation
 
-``` python
-    pip install vocalid
+```bash
+pip install vocalid
 ```
 
-------------------------------------------------------------------------
+Or install from source:
 
-## Example usage script(Python)
+```bash
+git clone https://github.com/Khubaib8281/VocalID.git
+cd VocalID
+pip install -e .
+```
 
-### Directory Structure Example
+---
 
-Assume your dataset looks like this:
+## Dataset Layout
 
-> Voice tip: Each voice sample of 5-6 seconds with different tone/ bg noise/ accent/ microphone
+Your dataset should be organized as:
 
-    └── dataset/
-        └── my_voice/               <-- positive class (your voice)
-            sample1.wav
-            sample2.wav
-            sample3.wav
-            sample4.wav
-            
-        └── other_voices/           <-- negative class(other's voices)
-            voice1.wav
-            voice2.wav
-            voice3.wav
-            voice4.wav
+```
+dataset/
+│
+├── my_voice/            # Positive samples (your voice)
+│   sample1.wav
+│   sample2.wav
+│   ...
+│
+└── other_voices/        # Negative samples (others)
+    voice1.wav
+    voice2.wav
+    ...
+```
 
-### Full python script
+Each sample should ideally be 4–6 seconds with varied tone, distance, and background conditions.
 
-``` python
+---
+
+## Example Usage (Python)
+
+### Train
+
+```python
 from vocalid.trainer import VoiceTrainer
-from vocalid.verifier import VoiceVerifier
-from vocalid.audio_utils import load_audio
 import glob
-
-# 1. TRAINING THE MODEL
 
 pos_files = glob.glob("dataset/my_voice/*.wav")
 neg_files = glob.glob("dataset/other_voices/*.wav")
 
 trainer = VoiceTrainer()
 trainer.train(pos_files, neg_files, save_path="my_voice_model.pkl")
-
-# (Optional) Check metrics printed by evaluate() in train()
-print("Training complete. Model saved.")
-
-
-# 2. EVALUATING THE TRAINED MODEL (Manually)
-
-# This is useful if you want to evaluate after loading the model.
-# Or you want to compute new metrics on a different test set.
-
-# Example test data (can be same folders or separate ones)
-test_pos = glob.glob("dataset/my_voice_test/*.wav")
-test_neg = glob.glob("dataset/other_voices_test/*.wav")
-
-metrics = trainer.evaluate(test_pos, test_neg)
-
-print("Accuracy:", metrics["accuracy"])
-print("Report:\n", metrics["report"])
-
-# Example output:
-# Classification report text
-# Accuracy: 0.91
-
-
-# 3. VERIFY A FILE
-
-verifier = VoiceVerifier("my_voice_model.pkl")
-
-to_verify = "verify_samples/unknown_voice.wav"
-ok, score = verifier.verify_file(to_verify)
-
-print(f"\nVerification result: {ok}, Score: {score:.3f}")
-# ok = True means it matches your voice
-# score is probability from the classifier
-
-
-# 4. VERIFY LIVE MICROPHONE AUDIO (Windows supported)
-
-# Record a short clip and verify
-audio_tensor = record_audio(seconds=4)
-ok, score = verifier.verify_array(audio_tensor)
-
-print(f"Live verification: {ok}, Score: {score:.3f}")
-
 ```
 
-### Example Evaluate-Only Script
+### Evaluate
 
-If someone just wants to evaluate the model later:
-
-``` python
-from vocalid.trainer import VoiceTrainer
-import glob
-
-trainer = VoiceTrainer()
+```python
 trainer.load("my_voice_model.pkl")
 
 test_pos = glob.glob("dataset/my_voice_test/*.wav")
 test_neg = glob.glob("dataset/other_voices_test/*.wav")
 
 metrics = trainer.evaluate(test_pos, test_neg)
-
 print("Accuracy:", metrics["accuracy"])
-print("Report:\n", metrics["report"])
-
+print(metrics["report"])
 ```
 
-### CLI Commands   
+### Verify a file
 
-``` python
-    vocalid train --positive my_voice --negative others --output model.pkl
-    vocalid evaluate --model model.pkl
-    vocalid verify audio.wav --model model.pkl
-    vocalid live --model model.pkl --seconds 4
+```python
+from vocalid.verifier import VoiceVerifier
+
+verifier = VoiceVerifier("my_voice_model.pkl")
+ok, score = verifier.verify_file("verify_samples/unknown.wav")
+
+print(ok, score)
 ```
 
-------------------------------------------------------------------------
+### Verify live audio
+
+```python
+audio_tensor = trainer.record_audio(seconds=4)
+ok, score = verifier.verify_array(audio_tensor)
+print(ok, score)
+```
+
+Live recording only works on systems with a real microphone. It will not run in cloud notebooks.
+
+---
+
+## CLI Usage
+
+Train:
+
+```bash
+vocalid train --positive my_voice --negative others --output model.pkl
+```
+
+Evaluate:
+
+```bash
+vocalid evaluate --model model.pkl --positive my_voice --negative others
+```
+
+Verify a file:
+
+```bash
+vocalid verify sample.wav --model model.pkl
+```
+
+Live verification:
+
+```bash
+vocalid live --model model.pkl --seconds 4
+```
+
+---
 
 ## Use Cases
 
-- Personal voice unlock systems
-- Lightweight identity verification
-- Speaker recognition prototypes
-- Research experiments in speaker embeddings
-- Security analyses for spoof detection
+* Personal voice-unlock systems
+* Lightweight speaker verification
+* Research in speaker embeddings
+* Prototyping identity checks
+* Classroom or research demonstrations
+* Testing spoofing and adversarial audio
 
-------------------------------------------------------------------------
+---
 
-## Why It Matters
+## Why This Matters
 
-This toolkit allows developers and researchers to:
+VocalID helps developers learn how practical speaker verification works without dealing with heavy frameworks. The library focuses on transparency, modularity and simplicity:
 
-- Build practical speaker authentication systems quickly
-- Learn how ECAPA embeddings work
-- Train custom voiceprints without heavy dependencies
-- Extend or plug into larger voice systems
+* Clear separation of embedding extraction and classification
+* Easy to swap in a different classifier
+* Works on CPU
+* No special hardware needed for training
 
-------------------------------------------------------------------------
+---
 
 ## Contributing
 
-Pull requests are welcome.\
-Tests can be run with:
+Pull requests are welcome. To run tests:
 
-``` python
-    pytest -v
+```bash
+pytest -v
 ```
+
+Feel free to open issues for bugs, improvement ideas, or feature requests.
+
+---
 
 ## Author
 
-**Muhammad Khubaib Ahmad**\
-
-AI/ML Engineer, Data Scientist and Voice Intelligence Researcher
-
-### Portfolio and Links
+**Muhammad Khubaib Ahmad**
+AI/ML Engineer | Data Scientist | Voice Intelligence Researcher
 
 - [**Portfolio:**](https://huggingface.co/spaces/Khubaib01/KhubaibAhmad_Portfolio)
-- [**Gmail:**](khubaib0.1ai@gmail.com)
-- [**GitHub:**](https://github.com/Khubaib8281)
-- [**LinkedIn:**](https://www.linkedin.com/in/muhammad-khubaib-ahmad-)
-- [**Kaggle:**](https://kaggle.com/muhammadkhubaibahmad)
-- [**HuggingFace:**](https://huggingface.co/Khubaib01)
+- **Email** [khubaib0.1ai@gmail.com](mailto:khubaib0.1ai@gmail.com)
+- [**GitHub**](https://github.com/Khubaib8281)
+- [**LinkedIn**](https://www.linkedin.com/in/muhammad-khubaib-ahmad-)
+- [**Kaggle**](https://kaggle.com/muhammadkhubaibahmad)
+- [**HuggingFace**](https://huggingface.co/Khubaib01)
 
-------------------------------------------------------------------------
+---
 
 ## License
 

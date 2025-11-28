@@ -46,8 +46,8 @@ def main():
 
         trainer = VoiceTrainer()
         trainer.load(args.model)
-        X, y = trainer.prepare_features(pos_files, neg_files)
-        results = trainer.evaluate(X, y)
+        # X, y = trainer.prepare_features(pos_files, neg_files)
+        results = trainer.evaluate(pos_files, neg_files)
 
         print("\n===== Evaluation Results =====")
         print("\nAccuracy", round(results["accuracy"], 4))
@@ -61,9 +61,14 @@ def main():
 
     elif args.commands == "live":
         verifier = VoiceVerifier(args.model)
-        audio_tensor = record_audio(args.seconds)
+        try:
+            audio_tensor = record_audio(args.seconds)
+        except RuntimeError as e:
+            print(str(e))
+            return
+
         ok, score = verifier.verify_array(audio_tensor)
-        print(f"Verified: {ok}, Score: {score:.2f}")  
+        print(f"Verified: {ok}, Score: {score:.2f}")
 
     else:
-        parser.print_help()   
+        parser.print_help()
